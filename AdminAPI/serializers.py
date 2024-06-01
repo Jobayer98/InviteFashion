@@ -41,9 +41,11 @@ class SizeSerializer(serializers.ModelSerializer):
 class VariantSerializer(serializers.ModelSerializer):
     color = serializers.StringRelatedField(read_only=True)
     size = serializers.StringRelatedField(read_only=True)
+    color_id = serializers.IntegerField(write_only=True)
+    size_id = serializers.IntegerField(write_only=True)
     class Meta:
         model = Variant
-        fields = '__all__'
+        fields ='__all__'
         
 class ProductItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)

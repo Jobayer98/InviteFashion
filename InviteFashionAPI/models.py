@@ -36,12 +36,12 @@ class ProductItem(models.Model):
     sale_price = models.DecimalField(max_digits=6, decimal_places=2)
     product_code = models.CharField(max_length=100, blank=True, null=True)
     image_url = models.URLField(max_length=100)
-    porduct = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
     
     def __str__(self) -> str:
-        return f"{self.porduct.title} | {self.product_code}"
+        return f"{self.product.title} | {self.product_code}"
     
 class Review(models.Model):
     product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
@@ -66,7 +66,7 @@ class Color(models.Model):
         return self.color
     
 class Variant(models.Model):
-    product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE)
+    product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE, related_name='variants')
     size = models.ForeignKey(Size, on_delete=models.PROTECT)
     color = models.ForeignKey(Color, on_delete=models.PROTECT)
     quantity_in_stock = models.PositiveIntegerField()
