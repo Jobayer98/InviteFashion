@@ -60,10 +60,10 @@ class Size(models.Model):
         return self.size
     
 class Color(models.Model):
-    color = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
     
     def __str__(self) -> str:
-        return self.color
+        return self.name
     
 class Variant(models.Model):
     product_item = models.ForeignKey(ProductItem, on_delete=models.CASCADE, related_name='variants')
@@ -72,4 +72,4 @@ class Variant(models.Model):
     quantity_in_stock = models.PositiveIntegerField()
     
     def __str__(self) -> str:
-        return f"{self.product_item.pk} | {self.size} | {self.color}"
+        return f"{self.product_item.pk} | {self.size.size} | {self.color.name}"
