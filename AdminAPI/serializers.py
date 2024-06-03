@@ -53,4 +53,4 @@ class ProductItemSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField(write_only=True)
     class Meta:
         model = ProductItem
-        fields = ['id','product', 'original_price', 'sale_price', 'image_url', 'product_id', 'variants']
+        fields = ['id','product', 'product_code', 'original_price', 'sale_price', 'image_url', 'product_id', 'variants']

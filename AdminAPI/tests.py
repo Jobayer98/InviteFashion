@@ -144,7 +144,6 @@ class SubCategoryListViewTests(APITestCase):
         self.assertEqual(SubCategory.objects.count(), 3)
         self.assertEqual(SubCategory.objects.get(id=response.data['id']).name, 'SubCategory3')
 
-
 class SubCategoryDetailViewTests(APITestCase):
     
     def setUp(self):
@@ -269,8 +268,7 @@ class ProductDetailViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Product.objects.count(), 0)
         
-
-
+# Test case for color view
 class ColorListViewTests(APITestCase):
     
     def setUp(self):
@@ -326,6 +324,7 @@ class ColorDetailViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Color.objects.count(), 0)
 
+# Test case for Size view
 class SizeListViewTests(APITestCase):
     
     def setUp(self):
@@ -380,3 +379,207 @@ class SizeDetailViewTests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Size.objects.count(), 0)
+
+# Test case for Product view
+class ProductListViewTests(APITestCase):
+    
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser(username='admin', password='password')
+        self.category = Category.objects.create(name='Category1')
+        self.sub_category = SubCategory.objects.create(name='SubCategory1')
+        self.brand = Brand.objects.create(name='Brand1')
+        
+        self.product1 = Product.objects.create(
+            title='Product1',
+            description='Description1',
+            category=self.category,
+            sub_category=self.sub_category,
+            brand=self.brand
+        )
+        self.product2 = Product.objects.create(
+            title='Product2',
+            description='Description2',
+            category=self.category,
+            sub_category=self.sub_category,
+            brand=self.brand
+        )
+        
+    def test_list_products(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-list')
+        response = self.client.get(url)
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
+    
+    def test_create_product(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-list')
+        data = {
+            'title': 'Product3',
+            'description': 'Description3',
+            'category_id': self.category.id,
+            'sub_category_id': self.sub_category.id,
+            'brand_id': self.brand.id
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Product.objects.count(), 3)
+        self.assertEqual(Product.objects.get(id=response.data['id']).title, 'Product3')
+        
+class ProductDetailViewTests(APITestCase):
+    
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser(username='admin', password='password')
+        self.category = Category.objects.create(name='Category1')
+        self.sub_category = SubCategory.objects.create(name='SubCategory1')
+        self.brand = Brand.objects.create(name='Brand1')
+        self.product = Product.objects.create(
+            title='Product1',
+            description='Description1',
+            category=self.category,
+            sub_category=self.sub_category,
+            brand=self.brand
+        )
+        
+    def test_retrieve_product(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-detail', kwargs={'pk': self.product.pk})
+        response = self.client.get(url)
+        serializer = ProductSerializer(self.product)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
+    
+    def test_update_product(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-detail', kwargs={'pk': self.product.pk})
+        data = {
+            'title': 'UpdatedProduct',
+            'description': 'UpdatedDescription',
+            'category_id': self.category.id,
+            'sub_category_id': self.sub_category.id,
+            'brand_id': self.brand.id
+        }
+        response = self.client.put(url, data, format='json')
+        self.product.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.product.title, 'UpdatedProduct')
+        self.assertEqual(self.product.description, 'UpdatedDescription')
+    
+    def test_delete_product(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-detail', kwargs={'pk': self.product.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Product.objects.count(), 0)
+
+# Test case for Product Item view
+class ProductItemListViewTests(APITestCase):
+    
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser(username='admin', password='password')
+        self.category = Category.objects.create(name='Category1')
+        self.sub_category = SubCategory.objects.create(name='SubCategory1')
+        self.brand = Brand.objects.create(name='Brand1')
+        self.product = Product.objects.create(
+            title='Product1',
+            description='Description1',
+            category=self.category,
+            sub_category=self.sub_category,
+            brand=self.brand
+        )
+        
+        self.product_item1 = ProductItem.objects.create(
+            original_price=100.00,
+            sale_price=80.00,
+            product_code='CODE1',
+            image_url='http://example.com/image1.jpg',
+            product=self.product
+        )
+        self.product_item2 = ProductItem.objects.create(
+            original_price=150.00,
+            sale_price=120.00,
+            product_code='CODE2',
+            image_url='http://example.com/image2.jpg',
+            product=self.product
+        )
+        
+    def test_list_product_items(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-item-list')
+        response = self.client.get(url)
+        product_items = ProductItem.objects.all()
+        serializer = ProductItemSerializer(product_items, many=True)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
+    
+    def test_create_product_item(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-item-list')
+        data = {
+            'original_price': 200.00,
+            'sale_price': 150.00,
+            'product_code': 'CODE3',
+            'image_url': 'http://example.com/image3.jpg',
+            'product_id': self.product.id
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ProductItem.objects.count(), 3)
+        self.assertEqual(ProductItem.objects.get(id=response.data['id']).product_code, 'CODE3')
+        
+class ProductItemDetailViewTests(APITestCase):
+    
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser(username='admin', password='password')
+        self.category = Category.objects.create(name='Category1')
+        self.sub_category = SubCategory.objects.create(name='SubCategory1')
+        self.brand = Brand.objects.create(name='Brand1')
+        self.product = Product.objects.create(
+            title='Product1',
+            description='Description1',
+            category=self.category,
+            sub_category=self.sub_category,
+            brand=self.brand
+        )
+        self.product_item = ProductItem.objects.create(
+            original_price=100.00,
+            sale_price=80.00,
+            product_code='CODE1',
+            image_url='http://example.com/image1.jpg',
+            product=self.product
+        )
+        
+    def test_retrieve_product_item(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-item-detail', kwargs={'pk': self.product_item.pk})
+        response = self.client.get(url)
+        serializer = ProductItemSerializer(self.product_item)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
+    
+    def test_update_product_item(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-item-detail', kwargs={'pk': self.product_item.pk})
+        data = {
+            'original_price': 120.00,
+            'sale_price': 90.00,
+            'product_code': 'UPDATEDCODE',
+            'image_url': 'http://example.com/updatedimage.jpg',
+            'product_id': self.product.id
+        }
+        response = self.client.put(url, data, format='json')
+        self.product_item.refresh_from_db()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.product_item.original_price, 120.00)
+        self.assertEqual(self.product_item.sale_price, 90.00)
+        self.assertEqual(self.product_item.product_code, 'UPDATEDCODE')
+        self.assertEqual(self.product_item.image_url, 'http://example.com/updatedimage.jpg')
+    
+    def test_delete_product_item(self):
+        self.client.login(username='admin', password='password')
+        url = reverse('product-item-detail', kwargs={'pk': self.product_item.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(ProductItem.objects.count(), 0)
