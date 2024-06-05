@@ -2,8 +2,9 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
-from InviteFashionAPI.models import Brand, Category, SubCategory, Product, ProductItem, Variant, Color, Size
-from .serializers import BrandSerializer, CategorySerializer, SubCategorySerializer, ProductSerializer, ProductItemSerializer, VariantSerializer, ColorSerializer, SizeSerializer
+
+from InviteFashionAPI.models import (Brand, Category, SubCategory, Product, Size)
+from .serializers import (BrandSerializer, CategorySerializer, SubCategorySerializer, ProductSerializer, SizeSerializer)
 
 # Test case for Brand View
 class BrandViewTests(APITestCase):
@@ -268,62 +269,6 @@ class ProductDetailViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Product.objects.count(), 0)
         
-# Test case for color view
-class ColorListViewTests(APITestCase):
-    
-    def setUp(self):
-        self.admin_user = User.objects.create_superuser(username='admin', password='password')
-        self.color1 = Color.objects.create(name='Color1')
-        self.color2 = Color.objects.create(name='Color2')
-        
-    def test_list_colors(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('color-list')
-        response = self.client.get(url)
-        colors = Color.objects.all()
-        serializer = ColorSerializer(colors, many=True)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
-    
-    def test_create_color(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('color-list')
-        data = {'name': 'Color3'}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Color.objects.count(), 3)
-        self.assertEqual(Color.objects.get(id=response.data['id']).name, 'Color3')
-
-class ColorDetailViewTests(APITestCase):
-    
-    def setUp(self):
-        self.admin_user = User.objects.create_superuser(username='admin', password='password')
-        self.color = Color.objects.create(name='Color1')
-        
-    def test_retrieve_color(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('color-detail', kwargs={'pk': self.color.pk})
-        response = self.client.get(url)
-        serializer = ColorSerializer(self.color)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
-    
-    def test_update_color(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('color-detail', kwargs={'pk': self.color.pk})
-        data = {'name': 'UpdatedColor'}
-        response = self.client.put(url, data, format='json')
-        self.color.refresh_from_db()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.color.name, 'UpdatedColor')
-    
-    def test_delete_color(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('color-detail', kwargs={'pk': self.color.pk})
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Color.objects.count(), 0)
-
 # Test case for Size view
 class SizeListViewTests(APITestCase):
     
@@ -473,113 +418,3 @@ class ProductDetailViewTests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Product.objects.count(), 0)
-
-# Test case for Product Item view
-class ProductItemListViewTests(APITestCase):
-    
-    def setUp(self):
-        self.admin_user = User.objects.create_superuser(username='admin', password='password')
-        self.category = Category.objects.create(name='Category1')
-        self.sub_category = SubCategory.objects.create(name='SubCategory1')
-        self.brand = Brand.objects.create(name='Brand1')
-        self.product = Product.objects.create(
-            title='Product1',
-            description='Description1',
-            category=self.category,
-            sub_category=self.sub_category,
-            brand=self.brand
-        )
-        
-        self.product_item1 = ProductItem.objects.create(
-            original_price=100.00,
-            sale_price=80.00,
-            product_code='CODE1',
-            image_url='http://example.com/image1.jpg',
-            product=self.product
-        )
-        self.product_item2 = ProductItem.objects.create(
-            original_price=150.00,
-            sale_price=120.00,
-            product_code='CODE2',
-            image_url='http://example.com/image2.jpg',
-            product=self.product
-        )
-        
-    def test_list_product_items(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('product-item-list')
-        response = self.client.get(url)
-        product_items = ProductItem.objects.all()
-        serializer = ProductItemSerializer(product_items, many=True)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
-    
-    def test_create_product_item(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('product-item-list')
-        data = {
-            'original_price': 200.00,
-            'sale_price': 150.00,
-            'product_code': 'CODE3',
-            'image_url': 'http://example.com/image3.jpg',
-            'product_id': self.product.id
-        }
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(ProductItem.objects.count(), 3)
-        self.assertEqual(ProductItem.objects.get(id=response.data['id']).product_code, 'CODE3')
-        
-class ProductItemDetailViewTests(APITestCase):
-    
-    def setUp(self):
-        self.admin_user = User.objects.create_superuser(username='admin', password='password')
-        self.category = Category.objects.create(name='Category1')
-        self.sub_category = SubCategory.objects.create(name='SubCategory1')
-        self.brand = Brand.objects.create(name='Brand1')
-        self.product = Product.objects.create(
-            title='Product1',
-            description='Description1',
-            category=self.category,
-            sub_category=self.sub_category,
-            brand=self.brand
-        )
-        self.product_item = ProductItem.objects.create(
-            original_price=100.00,
-            sale_price=80.00,
-            product_code='CODE1',
-            image_url='http://example.com/image1.jpg',
-            product=self.product
-        )
-        
-    def test_retrieve_product_item(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('product-item-detail', kwargs={'pk': self.product_item.pk})
-        response = self.client.get(url)
-        serializer = ProductItemSerializer(self.product_item)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
-    
-    def test_update_product_item(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('product-item-detail', kwargs={'pk': self.product_item.pk})
-        data = {
-            'original_price': 120.00,
-            'sale_price': 90.00,
-            'product_code': 'UPDATEDCODE',
-            'image_url': 'http://example.com/updatedimage.jpg',
-            'product_id': self.product.id
-        }
-        response = self.client.put(url, data, format='json')
-        self.product_item.refresh_from_db()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.product_item.original_price, 120.00)
-        self.assertEqual(self.product_item.sale_price, 90.00)
-        self.assertEqual(self.product_item.product_code, 'UPDATEDCODE')
-        self.assertEqual(self.product_item.image_url, 'http://example.com/updatedimage.jpg')
-    
-    def test_delete_product_item(self):
-        self.client.login(username='admin', password='password')
-        url = reverse('product-item-detail', kwargs={'pk': self.product_item.pk})
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(ProductItem.objects.count(), 0)

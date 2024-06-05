@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 
-from InviteFashionAPI.models import Product, ProductItem, Variant, Category, SubCategory, Brand, Size, Color
-from .serializers import BrandSerializer, CategorySerializer, SubCategorySerializer, ProductSerializer, ProductItemSerializer, VariantSerializer, ColorSerializer, SizeSerializer
+from InviteFashionAPI.models import Product, Category, SubCategory, Brand, Size
+from .serializers import BrandSerializer, CategorySerializer, SubCategorySerializer, ProductSerializer, SizeSerializer
 
 
 class BrandView(generics.ListCreateAPIView):
@@ -42,36 +42,6 @@ class ProductListView(generics.ListCreateAPIView):
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ProductSerializer
     queryset = Product.objects.all()
-    permission_classes = [permissions.IsAdminUser]
-    
-class ProductItemListView(generics.ListCreateAPIView):
-    serializer_class = ProductItemSerializer
-    queryset = ProductItem.objects.all()
-    permission_classes = [permissions.IsAdminUser]
-    
-class ProductItemDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = ProductItemSerializer
-    queryset = ProductItem.objects.all()
-    permission_classes = [permissions.IsAdminUser]
-    
-class VariantListView(generics.ListCreateAPIView):
-    serializer_class = VariantSerializer
-    queryset = Variant.objects.all()
-    permission_classes = [permissions.IsAdminUser]
-    
-class VariantDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = VariantSerializer
-    queryset = Variant.objects.all()
-    permission_classes = [permissions.IsAdminUser]
-    
-class ColorListView(generics.ListCreateAPIView):
-    serializer_class = ColorSerializer
-    queryset = Color.objects.all()
-    permission_classes = [permissions.IsAdminUser]
-    
-class ColorDetailView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = ColorSerializer
-    queryset = Color.objects.all()
     permission_classes = [permissions.IsAdminUser]
     
 class SizeListView(generics.ListCreateAPIView):
