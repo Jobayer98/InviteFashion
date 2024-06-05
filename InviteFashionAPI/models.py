@@ -2,22 +2,22 @@ from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 class Category(models.Model):
-    category = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
 
     def __str__(self) -> str:
-        return self.category
+        return self.title
     
 class SubCategory(models.Model):
-    subcategory = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
 
     def __str__(self) -> str:
-        return self.subcategory
+        return self.title
     
 class Brand(models.Model):
-    brand_name = models.CharField(max_length=100)
+    title = models.CharField(max_length=100)
     
     def __str__(self) -> str:
-        return self.brand_name
+        return self.title
     
 class Product(models.Model):
     title = models.CharField(max_length=255)
@@ -38,7 +38,7 @@ class Product(models.Model):
 class Size(models.Model):
     size = models.CharField(max_length=10)
     quantity_in_stock = models.PositiveIntegerField()
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     
     def __str__(self) -> str:
         return self.size

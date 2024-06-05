@@ -1,8 +1,10 @@
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Category, SubCategory, Brand, Product
-from .serializers import CategorySerializer, SubCategorySerializer, BrandSerializer, ProductSerializer
+from .serializers import CategorySerializer, SubCategorySerializer, BrandSerializer, ProductSerializer, ProductDetailSerializer
 
 class CategoryView(generics.ListAPIView):
     queryset = Category.objects.all()
@@ -19,21 +21,14 @@ class BrandView(generics.ListAPIView):
     
 class ProductListView(generics.ListAPIView):
     queryset = Product.objects.select_related('category').all()
-    serializer_class = ProductSerializer()
+    serializer_class = ProductSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['brand', 'category', 'sub_category']
+    search_fields = ['title']
+    ordering_fields = ['original_price', 'discount_price']
+    ordering = ['original_price']
     
-    def list(self, request):
-        products = self.get_queryset()
-        category_name = request.query_params.get('category')
-        subcategory_name = request.query_params.get('subcategory')
-        brand_name = request.query_params.get('brand')
-        
-        if category_name:
-            products = products.filter(category__name=category_name)
-        if subcategory_name:
-            products = products.filter(sub_category__name=subcategory_name)
-        if brand_name:
-            products = products.filter(brand__name=brand_name)
-            
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
+class ProductDetailView(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductDetailSerializer
              

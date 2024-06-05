@@ -23,18 +23,20 @@ class ProductSerializer(serializers.ModelSerializer):
     brand = serializers.StringRelatedField(read_only=True)
     class Meta:
         model = Product
-        fields = ['id', 'title', 'description', 'category', 'sub_category', 'brand']
+        fields = ['id', 'title', 'category', 'sub_category', 'brand', 'original_price', 'discount_price']
     
         
 class SizeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Size
-        fields = '__all__'   
+        exclude = ['product'] 
         
-# class ProductItemDetailSerializer(serializers.ModelSerializer):
-#     product = ProductSerializer(read_only=True)
-#     variants = VariantSerializer(read_only=True, many=True)
-#     class Meta:
-#         model = Product
-#         fields = ['id', 'product', 'original_price', 'sale_price', 'image_url', 'variants']
+class ProductDetailSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField(read_only=True)
+    sub_category = serializers.StringRelatedField(read_only=True)
+    brand = serializers.StringRelatedField(read_only=True)
+    variants = SizeSerializer(many=True, read_only=True)
+    class Meta:
+        model = Product
+        fields = ['id','title', 'category', 'sub_category', 'brand', 'original_price', 'discount_price', 'image_url', 'product_code', 'variants']
         
